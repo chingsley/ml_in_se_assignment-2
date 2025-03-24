@@ -1,0 +1,158 @@
+# Test Cases for `rename_reports` Function
+
+Here's a comprehensive test suite that simulates real-life behavior by creating a test folder structure, verifying the function's operation, and cleaning up afterwards.
+
+```python
+import os
+import shutil
+import unittest
+import tempfile
+from your_module import rename_reports  # Replace with actual import
+
+class TestRenameReports(unittest.TestCase):
+    def setUp(self):
+        # Create a temporary directory structure
+        self.test_dir = tempfile.mkdtemp(prefix="test__folder")
+        
+        # Create a sample directory structure with report.md files
+        self.structure = {
+            "test__folder1": {
+                "report.md": "Content 1",
+                "test__folder1a": {
+                    "report.md": "Content 1a",
+                    "other_file.txt": "Other content"
+                },
+                "test__folder1b": {
+                    "data.csv": "CSV data"
+                }
+            },
+            "test__folder2": {
+                "report.md": "Content 2",
+                "test__folder2a": {
+                    "notes.txt": "Some notes"
+                }
+            },
+            "test__folder3": {
+                "config.ini": "Configuration",
+                "test__folder3a": {
+                    "test__folder3b": {
+                        "report.md": "Content 3b"
+                    }
+                }
+            }
+        }
+        
+        self._create_structure(self.test_dir, self.structure)
+    
+    def _create_structure(self, base_path, structure):
+        """Helper to create directory structure"""
+        for name, content in structure.items():
+            path = os.path.join(base_path, name)
+            if isinstance(content, dict):
+                os.makedirs(path, exist_ok=True)
+                self._create_structure(path, content)
+            else:
+                with open(path, 'w') as f:
+                    f.write(content)
+    
+    def test_rename_reports(self):
+        # Count initial report.md files
+        initial_md_count = sum(1 for _ in self._find_files(self.test_dir, 'report.md'))
+        
+        # Run the function
+        rename_reports(self.test_dir)
+        
+        # Count report.txt files after renaming
+        final_txt_count = sum(1 for _ in self._find_files(self.test_dir, 'report.txt'))
+        
+        # Verify all report.md files were renamed
+        self.assertEqual(initial_md_count, final_txt_count)
+        
+        # Verify no report.md files remain
+        remaining_md_count = sum(1 for _ in self._find_files(self.test_dir, 'report.md'))
+        self.assertEqual(remaining_md_count, 0)
+        
+        # Verify the content was preserved
+        for root, _, files in os.walk(self.test_dir):
+            if 'report.txt' in files:
+                with open(os.path.join(root, 'report.txt'), 'r') as f:
+                    content = f.read()
+                    # Verify content matches expected based on path
+                    if 'test__folder1' in root and 'test__folder1a' in root:
+                        self.assertEqual(content, "Content 1a")
+                    elif 'test__folder1' in root:
+                        self.assertEqual(content, "Content 1")
+                    elif 'test__folder2' in root:
+                        self.assertEqual(content, "Content 2")
+                    elif 'test__folder3b' in root:
+                        self.assertEqual(content, "Content 3b")
+    
+    def test_no_report_files(self):
+        # Create a directory with no report.md files
+        empty_dir = os.path.join(self.test_dir, "test__folder_empty")
+        os.makedirs(empty_dir)
+        
+        # This should not raise any errors
+        rename_reports(empty_dir)
+        
+        # Verify no files were created
+        self.assertEqual(len(os.listdir(empty_dir)), 0)
+    
+    def test_permission_error_handling(self):
+        # Create a read-only report.md file
+        protected_dir = os.path.join(self.test_dir, "test__folder_protected")
+        os.makedirs(protected_dir)
+        protected_file = os.path.join(protected_dir, "report.md")
+        with open(protected_file, 'w') as f:
+            f.write("Protected content")
+        os.chmod(protected_file, 0o444)  # Read-only
+        
+        # This should handle the error gracefully
+        rename_reports(self.test_dir)
+        
+        # Verify the file wasn't renamed
+        self.assertTrue(os.path.exists(protected_file))
+        self.assertFalse(os.path.exists(os.path.join(protected_dir, "report.txt")))
+        
+        # Clean up - need to restore permissions first
+        os.chmod(protected_file, 0o644)
+    
+    def _find_files(self, directory, filename):
+        """Helper to find all files with given name in directory tree"""
+        for root, _, files in os.walk(directory):
+            if filename in files:
+                yield os.path.join(root, filename)
+    
+    def tearDown(self):
+        # Clean up the temporary directory
+        shutil.rmtree(self.test_dir)
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+## Test Case Explanation
+
+1. **Directory Structure Setup**:
+   - Creates a complex folder structure with `test__folder` prefixes
+   - Places `report.md` files at various levels
+   - Includes other file types to ensure they're not affected
+
+2. **Main Test Case**:
+   - Verifies all `report.md` files are renamed to `report.txt`
+   - Confirms no `report.md` files remain
+   - Checks that file contents are preserved correctly
+
+3. **Edge Cases**:
+   - Tests behavior when no report files exist
+   - Tests error handling when files are read-only
+
+4. **Cleanup**:
+   - Properly removes all test directories after tests complete
+
+To run these tests:
+1. Save the test file in your test directory
+2. Make sure to update the import statement to point to your actual module
+3. Run with `python -m unittest test_filename.py` or through your test runner
+
+The tests verify both the happy path and error conditions while maintaining realistic folder structures and file permissions.

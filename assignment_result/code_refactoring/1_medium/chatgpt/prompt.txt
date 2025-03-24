@@ -1,0 +1,53 @@
+# Global list to store account data
+accounts = []
+
+class Bank:
+    def _find_account(self, name):
+        for acc in accounts:
+            if acc["name"] == name:
+                return acc
+        return None
+
+    def create_account(self, name, monies=0):
+        if not self._find_account(name):
+            accounts.append({
+                "name": name,
+                "monies": monies
+            })
+            print(f"Account created for {name}")
+        else:
+            print("An account already exists")
+    def credit(self, name, amount):
+        if self._find_account(name):
+            for acc in accounts:
+                if acc["name"] == name:
+                    acc["monies"] += amount
+            print(f"{amount} credited to {name}")
+
+    def debit(self, name, amount):
+        if self._find_account(name):
+            for acc in accounts:
+                acc["monies"] -= amount
+
+        print(f"{amount} debited from {name}")
+
+    def get_funds(self, name):
+        account = self._find_account(name)
+        if account:
+            return account["monies"]
+        return "Account not found!"
+
+
+bank = Bank()
+
+# Example usage:
+if __name__ == "__main__":    
+    bank.create_account("John Doe")
+    bank.credit("John Doe", 100)
+    bank.debit("John Doe", 50)
+    funds = bank.get_funds("John Doe")
+    print("John Doe's funds:", funds)
+
+The Bank class uses 'print' to log data.  I want to be able to switch from proint in 
+development mode, to a third party logger in production mode. Refactor the class
+to be able achieve this efficiently

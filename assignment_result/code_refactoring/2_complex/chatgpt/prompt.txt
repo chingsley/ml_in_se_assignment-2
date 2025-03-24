@@ -1,0 +1,31 @@
+# Global list to store account data
+class PaymentProcessor:
+    def pay(self, bank, amount, account):
+        if bank == "Chase":
+            print(f"Your payment of {amount} for {account} has been processed by Chase")
+        elif bank == "Citibank":
+            print(f"Your payment of {amount} for {account} has been processed by Citibank")
+        else:
+            print("Unknown bank. Payment failed.")
+
+    def refund(self, bank, amount, account):
+        if bank == "Chase":
+            print(f"Your refund of {amount} for {account} has been processed by Chase")
+        elif bank == "Citibank":
+            print(f"Your refund of {amount} for {account} has been processed by Citibank")
+        else:
+            print("Unknown bank. Refund failed.")
+
+
+# Example usage:
+if __name__ == "__main__":
+    processor = PaymentProcessor()
+    processor.pay("Chase", 200, "0002340112450")
+    processor.pay("Citibank", 234, "0101901889181")
+    processor.refund("Chase", 78, "00998199181")
+
+    
+
+In the code above, the PaymentProcessor class uses a series of conditionals to determine
+the right processor for a given bank. Refactor the code to make it scalable so that new
+banks can easily to integrated without changin the main processing logic

@@ -1,0 +1,46 @@
+import os
+import shutil
+import unittest
+
+from main import rename_reports
+
+class TestRenameReports(unittest.TestCase):
+    def setUp(self):
+        """Set up a test directory structure."""
+        self.test_root = os.path.join(os.getcwd(), "test__folder_p1")
+        self.test_structure = [
+            "test__folder_p1/test__folder_p2a/test__folder_p3a/test__folder_p4/report.md",
+            "test__folder_p1/test__folder_p2a/test__folder_p3b/test__folder_p4/report.md",
+            "test__folder_p1/test__folder_p2b/test__folder_p3a/test__folder_p4/report.md",
+            "test__folder_p1/test__folder_p2b/test__folder_p3b/test__folder_p4/report.md",
+            "test__folder_p1/test__folder_p2c/test__folder_p3a/test__folder_p4/report.md",
+            "test__folder_p1/test__folder_p2c/test__folder_p3b/test__folder_p4/report.md",
+        ]
+
+        # Create the folders and files
+        for file_path in self.test_structure:
+            full_path = os.path.join(os.getcwd(), file_path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w") as f:
+                f.write("Test report file")
+
+    def test_rename_reports(self):
+        """Test if report.md files are correctly renamed to report.txt."""
+        rename_reports(self.test_root)
+
+        for file_path in self.test_structure:
+            old_path = os.path.join(os.getcwd(), file_path)
+            new_path = old_path.replace("report.md", "report.txt")
+
+            # Ensure old file does not exist
+            self.assertFalse(os.path.exists(old_path), f"File {old_path} was not renamed")
+
+            # Ensure new file exists
+            self.assertTrue(os.path.exists(new_path), f"File {new_path} was not created")
+
+    def tearDown(self):
+        """Remove the test directory after the test runs."""
+        shutil.rmtree(self.test_root, ignore_errors=True)
+
+if __name__ == "__main__":
+    unittest.main()
