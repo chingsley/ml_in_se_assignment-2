@@ -1,31 +1,24 @@
-# def insertion_sort_shifts(arr):
-#     shifts = 0  # Initialize the shift counter
-#     for i in range(1, len(arr)):
-#         key = arr[i]  # Current element to be inserted
-#         j = i - 1
-#         # Move elements of arr[0..i-1] that are greater than key to one position ahead
-#         while j >= 0 and arr[j] > key:
-#             arr[j + 1] = arr[j]
-#             shifts += 1
-#             j -= 1
-#         arr[j + 1] = key
-#     return shifts
+def insertionSort(arr):
+    n = len(arr)
+    total_shifts = 0
 
-import bisect
+    for i in range(1, n):
+        key = arr[i]
+        j = i - 1
+        shifts_in_insertion = 0
 
+        # Move elements of arr[0..i-1], that are greater than key,
+        # to one position ahead of their current position
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+            shifts_in_insertion += 1
 
-def insertion_sort_shifts(arr):
-    shifts = 0
-    sorted_list = []
+        total_shifts += shifts_in_insertion
 
-    for num in arr:
-        pos = bisect.bisect_left(sorted_list, num)
-        shifts += len(sorted_list) - pos
-        bisect.insort(sorted_list, num)
-
-    return shifts
+    return total_shifts
 
 
 # Example usage:
-arr = [1, 1, 1, 2, 2]
-print(insertion_sort_shifts(arr))  # Output: 4, wrong
+arr = [4, 3, 2, 1]
+print(insertionSort(arr))  # Output: 4, wrong

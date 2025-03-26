@@ -1,4 +1,0 @@
-Write a python function that returns the number of shifts required to sort an array
-using insertion sort. For example given the array [4, 3, 2, 1], it takes 6 shifts
-to sort the array by insertion sort. The function should be optimized so that it
-can handle a list in the range of hundreds of thousands.
