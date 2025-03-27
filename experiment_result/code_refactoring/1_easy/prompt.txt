@@ -1,0 +1,63 @@
+def update_smallest_range(smallest: list, new_range: tuple):
+    curr_length = smallest[1] - smallest[0]
+    new_length = new_range[1] - new_range[0]
+    if new_length < curr_length:
+        smallest[0], smallest[1] = new_range[0], new_range[1]
+
+
+def string_to_hash(s: str) -> dict:
+    hash_map = {}
+    for ch in s:
+        hash_map[ch] = hash_map.get(ch, 0) + 1
+    return hash_map
+
+
+def smallest_substring_containing(big_string: str, small_string: str) -> str:
+    target_counts = string_to_hash(small_string)
+    window_counts = {}
+    unique_chars_count = len(target_counts)
+    k = 0
+
+    smallest = [-float("inf"), 0]
+    left_idx, right_idx = 0, 0
+
+    while right_idx < len(big_string):
+        # Expand window
+        while k < unique_chars_count and right_idx < len(big_string):
+            ch = big_string[right_idx]
+            if ch not in target_counts:
+                right_idx += 1
+                continue
+
+            window_counts[ch] = window_counts.get(ch, 0) + 1
+
+            if window_counts[ch] == target_counts[ch]:
+                k += 1
+
+            if k == unique_chars_count:
+                update_smallest_range(smallest, (left_idx, right_idx))
+                break
+
+            right_idx += 1
+
+        # Contract window
+        while k == unique_chars_count and left_idx <= right_idx:
+            ch = big_string[left_idx]
+            if ch not in window_counts:
+                left_idx += 1
+                continue
+
+            update_smallest_range(smallest, (left_idx, right_idx))
+
+            window_counts[ch] -= 1
+            if window_counts[ch] < target_counts[ch]:
+                k -= 1
+
+            left_idx += 1
+
+        right_idx += 1
+
+    return big_string[smallest[0] : smallest[1] + 1] if smallest[0] >= 0 else ""
+
+
+Assuming that I'm working with a rule that no function should have more than 10 lines, how would you refactor smallestSubstringContaining?
